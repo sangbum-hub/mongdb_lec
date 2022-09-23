@@ -1,0 +1,84 @@
+// use company
+db.createCollection("employee")
+
+db.employee.insertMany([{_id:1,
+                         name:"Peter",
+                         job:"clerk",
+                         salary:1200,
+                         dept:"research"},
+                        {_id:2,
+                         name:"Turner",
+                         job:"salseman",
+                         salary:1500,
+                         comm:200,
+                         dept:"sales"},
+                        {_id:3,
+                         name:"Allen",
+                         job:"manager",
+                         salary:4000,
+                         travel:850,
+                         dept:"sales"},
+                        {_id:4,
+                         name:"Miller",
+                         job:"analyst",
+                         salary:3000,
+                         overtime:500,
+                         medical:700,
+                         dept:"research"},
+                        {_id:5,
+                         name:"King",
+                         job:"manager",
+                         salary:5000,
+                         travle:1200,                         
+                         dept:"research"},
+                        {_id:6,
+                         name:"Smith",
+                         job:"clerk",
+                         salary:900,
+                         travel:200,
+                         medical:400,
+                         dept:"accounts"},
+                        {_id:7,
+                         name:"Ford",
+                         job:"manager",
+                         salary:3000,
+                         medical:800,
+                         travel:1200,
+                         dept:"accounts"},
+                        {_id:8,
+                         name:"Jones",
+                         job:"clerk",
+                         salary:700,
+                         medical:500,
+                         dept:"accounts"}])
+                        
+db.employee.find()                     
+                        
+db.employee.find({})    
+
+
+// job 이 manager 인 사람
+db.employee.find({job:"manager"})                        
+                        
+                        
+// name 이 Peter, Allen, Smith 인 사람
+db.employee.find({name:{$in:["Peter", "Allen", "Smith"]}})
+                                                
+// name 이 Peter, Allen, Smith 가 아닌 사람
+db.employee.find({name:{$nin:["Peter", "Allen", "Smith"]}})    
+
+
+// $or
+db.employee.find({$or:[{dept:"research"},{dept:"sales"}]})
+
+// $nor
+db.employee.find({$nor:[{dept:"research"},{dept:"sales"}]})
+
+db.employee.find({$nor:[{travel:{$gt:1300}},{medical:{$gt:600}}]})
+
+
+
+
+
+               
+                        

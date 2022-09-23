@@ -1,0 +1,395 @@
+NoSQL - Not Only SQL
+
+RDBMS 에서 BigData 를 처리하는데 한계가 있어서
+이를 보완하고자 만들어진 새로운 형태의 DataBase
+
+RDBMS에는 고정된 scheme 가  있는데 반해서
+NoSQL 에는 고정된 scheme 가 없음
+  ㄴ column 이 정해져있지 않음
+  ㄴ join 을 사용할 수 없음
+  ㄴ transaction 이 없음
+  ㄴ 분산처리가 용이함
+
+NoSQL  종류
+
+interface         
+
+key-value store    redis, riak
+wide column store  HBASE, cassandra
+Document store     mongoDB, couchDB
+Graph store        Neo4j 
+
+mongoDB - document DB
+           ㄴ JSON 행태로 되어 있음
+
+document 예시
+
+ {
+   "_id" : ..............,
+   "name" : "mongodb",
+   "grade" : {first:"jouh", second:"tom", third : "dave"}
+ }
+
+
+MongoDB의 Database <- collection 의 집합
+RDBMS 의 table - MongoDB의 collection
+RDBMS 의 row   - MongoDB의 document
+          ㄴ record, tuple
+
+
+RDBMS                MongoDB
+--------------------------------------
+DataBase             DataBase
+Table                Collection
+Row(record,tuple)    Document  
+Column (field)       key  (field)
+Primary Key          _id(Primary Key)
+
+
+
+MongoDB 설치
+
+https://www.mongodb.com/try/download/community
+에서 설치파일을 다운로드함
+
+설치 폴더
+C:\Program Files\MongoDB\Server\4.0\data\
+C:\Program Files\MongoDB\Server\4.0\log\
+
+
+MongoDB 환경변수 설정하기
+
+MongoDB 설치 폴더로 이동함
+
+C:\Program Files\MongoDB
+C:\Program Files\MongoDB\Server\4.0\bin
+ ㄴ 이 경로를 윈도우 환경변수에 등록함
+ 
+ 설정 > 시스템 > 정보 > 시스템정보 > 시스템창 > 고급시스템설정
+ >환경변수 > 시스템변수 > Path > 편집 > 새로만들기
+ > 위의 경로를 복사 붙여넣기 함
+
+MongoDB 실행
+cmd(명령프롬프트창)를 관리자권한으로 열어서
+mongod 라고 입력함
+  ㄴ 포트번호  27017 에 접속한 것 확인
+
+
+Robo3T 실습
+
+Robo3T 에서 connection(server) 생성하기
+1) 왼쪽 맨 위 File 탭 바로 밑에 있는 모니터 모양 아이콘 클릭
+2) MongoDB Connections 대화상자 왼쪽 맨 위 Create 클릭
+3) Name 을 입력하고 (다른 것은 그대로 둠) 오른쪽 아래 Save 클릭
+4) MongoDB Connections 대화상자에 connection 목록이 나오면
+5) 연결하고자 하는 connection 을 선택하고 오른쪽 아래 Connect 클릭
+6) Collections 폴더 오른쪽 클릭 후, Create Collection 을 클릭함
+
+
+- shell 에서 명령어로 작업하기 - 
+
+
+Right-click (firstconn) -> Open Shell 
+show dbs - 전체 데이터베이스 목록 확인
+use firstdb[DB 이름] - 데이터베이스 선택 
+                     - 없는 경우에는 새로 생성함
+show collections  - 전체 collection 목록 확인        
+
+db.collection이름.함수() 
+  ㄴ 해당 collection 의 data 에 CRUD 작업 수행
+db.firstdb.find()
+
+collection 을 지정해서 document를 조회함
+db.getCollection('firstcollection').find({})
+
+데이터베이스 새로 생성하기
+use firstdb
+
+데이터베이스 상태 확인하기
+db.stats()
+
+컬렉션 생성하기
+db.createCollection("student", {capped:true, size:10000})
+
+capped 설정을 true 로 했는지 확인하기
+db.student.isCapped()
+
+컬렉션 삭제하기
+db.student.drop()
+
+컬렉션 생성하기
+db.createCollection("student")
+
+capped 설정을 true 로 했는지 확인하기
+{capped:true, size:10000} 설정 없이 생성하면 false 가 됨
+db.student.isCapped()
+
+show collections
+  firstcollection
+  student
+  
+컬렉션 상태(status) 확인하기
+db.student.stats()
+size 와 capped 값 확인해 보기
+
+
+컬렉션 이름 변경하기
+student -> std
+db.student.renameCollection('std')
+
+RDBMS : table
+CREATE TABLE student(
+  id MEDIUMINT NOT NULL AUTO_INCREMENT,
+  user_id VARCHAR(30),
+  age NUMBER,
+  status CHAR(1),
+  PRIMARY KEY(id)
+);
+
+MongoDB : collection 생성
+db.std.insertOne(
+  {
+    userid: "abc123",
+    age : 55,
+    status : "A"
+  }
+)
+
+CRUD(MongoDB)
+Create(Insert)
+Read(Search)
+Update
+Delete(Drop)
+
+std collection 삭제하기
+db.std.drop()
+
+collection 생성
+  PRIMARY KEY 를 위한 column 을 만들지 않아도 됨
+  collection 에서 _id 가 모든 document 마다 
+    ㄴ 자동으로 생성되어서 primary key 역할을 함
+  key(column) 마다 data type 을 지정하지 않아도 됨
+    ㄴ "key":"value" 가 기본 형식
+
+collection 구조 변경하기
+ 이미 있는 collection 에 key 를 추가(삭제)하는 경우
+ 새로 insert 하는 document 에 필요한 key 를 추가하면 됨
+
+RDBMS
+  ALTER TABLE student ADD COLUMN date DATETIME
+
+MongoDB
+  db.student.updateMany({}, {$set : {date : new Date()}})
+  
+  
+document 입력하기 : insertOne(), insertMany()
+insertOne()  : 한 개의 document 생성하기
+insertMany() : 여러 개의 document 생성하기
+
+db.student.insertOne(  <- collection
+  {
+    name:"tom",        <- key(fie ld) : value
+    age : 21,
+    stdNum : 2022001
+  }
+)
+
+student Collection 생서하기
+db.createCollection('student')
+
+document 추가하기
+db.student.insertOne(  <- collection
+  {
+    name:"tom",        <- key(fie ld) : value
+    age : 21,
+    class : "A"
+  }
+) 
+
+student Collection 에 있는 document 확인하기
+db.getCollection('student').find({})
+db.student.find()
+
+
+student Collection 에 document 추가하기
+db.student.insertOne(
+  {
+    user_id : "bcd001",
+    age : 42,
+    class : "A"
+  }
+)
+
+
+document 삭제하기
+db.student.deleteOne({"age":21})
+
+
+
+insertMany()
+
+articles collection 생성하기
+db.createCollection('articles')
+
+db.articles.insertMany(
+  [
+    {subject:"coffee", author:"xyz", views:50},
+    {subject:"Coffee Shopping", author:"efg", views:5},
+    {subject:"Baking a cake", author:"abc", views:80},
+    {subject:"baking", author:"xyz", views:100},
+    {subject:"Cafe Con Leche", author:"abc", views:200},
+    {subject:"Company", author:"jkl", views:78},
+    {subject:"coffee and cream", author:"efg", views:10},
+    {subject:"Cafe Con Leche", author:"xyz", views:10},
+    {subject:"coffees", author:"xyz", views:10},
+    {subject:"coffee1", author:"xyz", views:10}
+  ]  
+)
+  
+db.articles.find()
+  
+  
+emp Collection 생성하기 <- createCollection
+db.createCollection('emp')
+
+emp Collection 에
+Document 데이터 insert 하기 <- insertOne() / insertMany()
+
+user_id, status 에는 String type 으로 넣고 ("" 사용(O))
+age 에는 Double type 으로 넣기 ("" 사용(X))
+
+- user_id 가 bcd001, age 가 45, status 가 A 인 Document
+- user_id 가 bcd002, age 가 25, status 가 B 인 Document
+- user_id 가 bcd003, age 가 50, status 가 A 인 Document
+- user_id 가 bcd004, age 가 35, status 가 A 인 Document
+- user_id 가 abc001, age 가 28, status 가 B 인 Document
+
+db.emp.insertMany(
+    [
+      {user_id :"bcd001", age : 45, status : "A"},
+      {user_id :"bcd002", age : 25, status : "B"},
+      {user_id :"bcd003", age : 50, status : "A"},
+      {user_id :"bcd004", age : 35, status : "A"},
+      {user_id :"abc001", age : 28, status : "B"}
+    ]  
+)
+
+db.emp.find()
+
+
+document 조회하기 : Read(find())
+
+{age : {$gt : 40}} <- age 가 40 이상인 사람만 조회하기
+
+db.emp.find(  
+  {age : {$gt : 40}} 
+)
+
+db.emp.find(  
+   검색 조건           검색(조회)할 key : 1(조회(O)), 0(조회(X))
+  {age : {$gt : 40}} , {user_id:1, age:1, _id:0}
+).limit(5)      <-  검색 건수  
+
+
+RDBMS
+  SELECT * FROM emp
+MongDB
+  db.emp.find()
+
+SELECT _id, user_id, age FROM emp
+db.emp.find({}, {_id:1, user_id:1, age:1})
+
+SELECT user_id, age FROM emp
+db.emp.find({}, {_id:0, user_id:1, age:1})
+
+SELECT * FROM emp WHERE status = "A"
+db.emp.find({status : "A"})
+
+SELECT * FROM emp WHERE status = "A" AND age = 50
+db.emp.find({status:"A", age:50})
+
+SELECT * FROM emp WHERE status = "A" OR age = 50
+db.emp.find({$or : [{status:"A"}, {age:50}]})
+
+
+emp collection 에서 user_id 가 bcd002 인 
+document 의 user_id, age, status, _id 를 출력하세요
+
+db.emp.find({user_id:"bcd002"})
+
+
+비교 명령어
+
+$eq      =  
+$ne      !=   not equal 
+$gt      >
+$gte     >=
+$lt      <
+$lte     <=
+$in      
+$nin
+
+
+SELECT * FROM emp WHERE age > 25
+db.emp.find({age : {$gt : 25}})
+
+SELECT * FROM emp WHERE age < 25
+db.emp.find({age : {$lt : 25}})  : 0 명
+db.emp.find({age : {$lte : 25}}) : 1 명
+
+SELECT * FROM emp WHERE age > 25 AND age <= 50
+db.emp.find({age : {$gt : 25, $lte : 50}})
+
+SELECT * FROM emp WHERE user_id like "%bc%"
+db.emp.find({user_id : /bc/})
+
+SELECT * FROM emp WHERE user_id like "bc%"
+db.emp.find({user_id : /^bc/})
+
+
+*** 오름차순(ASC) : 1
+SELECT * FROM emp WHERE status = "A" ORDER BY user_id ASC
+db.emp.find({status:"A"}).sort({user_id:1})
+
+*** 내림차순(DESC) : -1
+SELECT * FROM emp WHERE status = "A" ORDER BY user_id DESC
+db.emp.find({status:"A"}).sort({user_id:-1})
+
+SELECT COUNT(*) FROM emp
+db.emp.count()
+db.emp.find().count()
+
+SELECT COUNT(user_id) FROM emp
+db.emp.count({user_id : {$exists : true}})
+db.emp.find({user_id : {$exists : true}}).count()
+
+SELECT COUNT(*) FROM emp WHERE age > 30
+db.emp.count({age : {$gt : 30}})
+db.emp.find({age : {$gt : 30}}).count()
+
+SELECT DISTINCT(status) FROM emp
+db.emp.distinct("status")
+
+SELECT * FROM emp LIMIT 1
+db.emp.findOne()
+db.emp.find().limit(1)
+
+
+(emp collection 에서)
+- age 가 20을 초과하는 document 의 user_id만 출력하세요
+db.emp.find({age : {$gt : 20}}, {user_id:1, _id:0})
+db.emp.find({age : {$gt : 20}}, {user_id:1})
+db.emp.find({age : {$gt : 20}}, {user_id:1,age:1,_id:0})
+db.emp.find({age : {$gt : 20}}, {user_id:1,age:1,_id:0})
+_id key  를 조회하지 않으려면 반드시 0으로 설정해야 함
+다른 key 들은 1로 설정하지 않으면 조회되지 않음
+
+- age 가 50 이면서
+
+
+
+
+
+
+
+
